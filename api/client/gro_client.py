@@ -34,7 +34,12 @@ class GroClient(Client):
 
     """
 
-    def __init__(self, api_host, access_token):
+    def __init__(self, api_host=cfg.API_HOST, access_token=None):
+        if access_token is None:
+            if 'GROAPI_TOKEN' in os.environ:
+                access_token = os.environ['GROAPI_TOKEN']
+            else:
+                access_token = lib.get_access_token(api_host)
         super(GroClient, self).__init__(api_host, access_token)
         self._logger = lib.get_default_logger()
         self._data_series_list = []  # all that have been added

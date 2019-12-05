@@ -8,6 +8,7 @@ should appear in the client classes rather than here.
 from builtins import map
 from builtins import str
 from api.client import cfg
+from getpass import getpass
 import json
 import logging
 import requests
@@ -49,7 +50,10 @@ def get_default_logger():
     return logger
 
 
-def get_access_token(api_host, user_email, user_password, logger=None):
+def get_access_token(api_host=cfg.API_HOST,
+                     user_email=input("Email address: "),
+                     user_password=getpass(),
+                     logger=get_default_logger()):
     """Request an access token.
 
     Parameters
@@ -71,21 +75,18 @@ def get_access_token(api_host, user_email, user_password, logger=None):
 
     """
     retry_count = 0
-    if not logger:
-        logger = get_default_logger()
+    if api_host[:3] != 'http':  # if the url doesn't start with http, default to using https://
+        api_host = 'https://' + api_host
     while retry_count < cfg.MAX_RETRIES:
-        get_api_token = requests.post('https://' + api_host + '/api-token',
-                                      data={'email': user_email,
-                                            'password': user_password})
-        if get_api_token.status_code == 200:
+        response = requests.post(api_host + '/api-token',
+                                 data={'email': user_email, 'password': user_password})
+        if response.status_code == 200:
             logger.debug('Authentication succeeded in get_access_token')
-            return get_api_token.json()['data']['accessToken']
+            return response.json()['data']['accessToken']
         else:
-            logger.warning('Error in get_access_token: {}'.format(
-                get_api_token))
+            logger.warning('Error in get_access_token: {}'.format(response))
         retry_count += 1
-    raise Exception('Giving up on get_access_token after {0} tries.'.format(
-        retry_count))
+    raise Exception('Giving up on get_access_token after {0} tries.'.format(retry_count))
 
 
 def redirect(old_params, migration):
