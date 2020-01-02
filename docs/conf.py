@@ -85,8 +85,13 @@ master_doc = 'index'
 
 # Do not delete these files:
 scv_grm_exclude = ('README.md', '.gitignore', '.nojekyll', 'CNAME')
+
+# Primary version should always be the latest tag
+scv_greatest_tag = True
+
+# Show a warning when you're viewing an older tag
 scv_show_banner = True
-scv_banner_main_ref = 'development'
+scv_banner_greatest_tag = True  # show the warning on all versions except the greatest tag
 
 # still build other branches, but hide the version selectors in _static/css/custom-theme.css.
 # Uncomment this line to stop building them altogether:
